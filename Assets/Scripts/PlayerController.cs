@@ -5,14 +5,22 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float speed = 30f;
-    public bool hasPowerup;
+    public bool hasPowerup; 
+    public bool hasPowerup2;
     private float forwardInput;
     private Rigidbody _rigidbody;
     private GameObject focalPoint;
     private float powerupForce = 15f;
-    private void Start()
+    public GameObject[] powerupIndicators;
+    private float originalScale = 1.5f; //escala sin auntentar el powerup
+    private float powerupScale = 2f; //escala aumentada por el powerup
+
+    private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
+    }
+    private void Start()
+    {
         focalPoint = GameObject.Find("Focal Point");
     }
     private void Update()
@@ -23,10 +31,17 @@ public class PlayerController : MonoBehaviour
   
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Powerup")) ;
+        if (other.gameObject.CompareTag("Powerup")) 
         {
             hasPowerup = true;
             Destroy(other.gameObject);
+            StartCoroutine(PowerupCountDown());
+        }
+        if (other.gameObject.CompareTag("Powerup2"))
+        {
+            hasPowerup2 = true;
+            Destroy(other.gameObject);
+            StartCoroutine(PowerupCountDown());
         }
     }
     
@@ -45,7 +60,21 @@ public class PlayerController : MonoBehaviour
     }
     private IEnumerator PowerupCountDown()
     {
-        yield return new WaitForSeconds(6);
+        if(hasPowerup2)
+        {
+            transform.localScale = powerupScale * Vector3.one;
+        }
+        for(int i=0; i<powerupIndicators.Length; i++)
+        {
+            powerupIndicators[i].SetActive(true);
+            yield return new WaitForSeconds(2);
+            powerupIndicators[i].SetActive(false);
+        }
+        if (hasPowerup2)
+        {
+            transform.localScale = originalScale * Vector3.one;
+        }
         hasPowerup = false;
+        hasPowerup2 = false;
     }
 }
